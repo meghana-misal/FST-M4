@@ -1,0 +1,12 @@
+--Load input file from HDFS
+inputFile = LOAD 'hdfs:///user/meghana/activity1/episodeIV_dialouges.txt' AS (line);
+-- Tokeize each word in the file (Map)
+words = FOREACH inputFile GENERATE FLATTEN(TOKENIZE(line)) AS word;
+-- Combine the words from the above stage
+grpd = GROUP words BY word;
+-- Count the occurence of each word (Reduce)
+cntd = FOREACH grpd GENERATE group, COUNT(words) as cnt;
+-- output in Descending order
+descOutput = ORDER cntd by cnt DESC;
+-- Store the result in HDFS
+STORE descOutput INTO 'hdfs:///user/meghana/episodeIV_dialouges/results';
